@@ -17,3 +17,4 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 alias v='nvim --cmd "set noswapfile"'
+alias vi='nvim --cmd "set noswapfile"'
