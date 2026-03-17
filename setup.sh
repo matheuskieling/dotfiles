@@ -7,6 +7,7 @@ sudo pacman -S --noconfirm --needed keyd
 sudo pacman -S --noconfirm --needed libsecret
 sudo pacman -S --noconfirm --needed tmux
 sudo pacman -S --noconfirm --needed fzf
+sudo pacman -S --noconfirm --needed dotnet-sdk-8.0
 
 # ---- AUR ----
 yay -S --noconfirm --needed google-chrome
@@ -27,17 +28,18 @@ else
   cd dotfiles
 fi
 
-# ---- Stow configs ----
+# ---- Stow configs (--adopt overwrites existing files) ----
 cd ~/dotfiles
-sudo stow keyd -t / --restow
-stow xkb --restow
-stow tmux --restow
-stow scripts --restow
-stow nvim --restow
-stow alacritty --restow
-stow hypr --restow
-stow waybar --restow
-stow starship --restow
+sudo stow keyd -t / --adopt
+stow xkb --adopt
+stow tmux --adopt
+stow scripts --adopt
+stow nvim --adopt
+stow alacritty --adopt
+stow hypr --adopt
+stow waybar --adopt
+stow starship --adopt
+git checkout .
 cd ~
 
 # ---- CLAUDE CODE ----
