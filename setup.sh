@@ -10,6 +10,10 @@ sudo pacman -S --noconfirm --needed libsecret
 git config --global credential.helper libsecret
 git config --global credential.useHttpPath true
 
+# ---- Clone Dotfiles ----
+cd ~
+git clone https://github.com/matheuskieling/dotfiles.git
+
 # ---- Configuração Keyd via Stow ----
 cd ~/dotfiles
 sudo stow keyd -t /
