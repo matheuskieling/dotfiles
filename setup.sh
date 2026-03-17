@@ -37,6 +37,7 @@ stow nvim --restow
 stow alacritty --restow
 stow hypr --restow
 stow waybar --restow
+stow starship --restow
 cd ~
 
 # ---- CLAUDE CODE ----
