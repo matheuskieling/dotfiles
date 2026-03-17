@@ -20,4 +20,5 @@ sudo stow keyd -t /
 sudo stow nvim --adopt
 sudo stow alacritty --adopt
 sudo stow hypr --adopt
+sudo stow waybar --adopt
 cd ~
