@@ -1,0 +1,9 @@
+partial alphanumeric_keys
+xkb_symbols "altgr-intl-cedilla" {
+    include "us(altgr-intl)"
+
+    key <AB03> {
+        type[Group1] = "FOUR_LEVEL",
+        symbols[Group1] = [ c, C, ccedilla, Ccedilla ]
+    };
+};
