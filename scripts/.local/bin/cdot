@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+cd ~/dotfiles || exit 1
+
+if [[ -z $(git status --porcelain) ]]; then
+    echo "Nothing to commit."
+    exit 0
+fi
+
+git add -A
+git status --short
+echo ""
+read -rp "Commit message (leave empty for 'update dotfiles'): " msg
+msg="${msg:-update dotfiles}"
+
+git commit -m "$msg"
+git push
