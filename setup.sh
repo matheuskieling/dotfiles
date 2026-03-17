@@ -8,9 +8,11 @@ sudo pacman -S --noconfirm --needed libsecret
 sudo pacman -S --noconfirm --needed tmux
 sudo pacman -S --noconfirm --needed fzf
 sudo pacman -S --noconfirm --needed dotnet-sdk-8.0
+sudo pacman -S --noconfirm --needed discord
 
 # ---- AUR ----
 yay -S --noconfirm --needed google-chrome
+yay -S --noconfirm --needed zapzap
 
 # ---- Configurações Git ----
 git config --global credential.helper libsecret
