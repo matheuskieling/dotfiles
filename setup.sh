@@ -8,7 +8,9 @@ sudo pacman -S --noconfirm --needed libsecret
 sudo pacman -S --noconfirm --needed tmux
 sudo pacman -S --noconfirm --needed fzf
 sudo pacman -S --noconfirm --needed dotnet-sdk-8.0
+sudo pacman -S --noconfirm --needed aspnet-runtime-8.0
 sudo pacman -S --noconfirm --needed discord
+sudo pacman -S --noconfirm --needed dbeaver
 
 # ---- AUR ----
 yay -S --noconfirm --needed google-chrome
