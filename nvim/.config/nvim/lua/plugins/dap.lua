@@ -31,15 +31,28 @@ return {
       { "<leader>dr", function() require("dap").repl.toggle() end, desc = "Toggle REPL" },
       { "<leader>dl", function() require("dap").run_last() end, desc = "Run Last" },
       { "<leader>dt", function() require("dap").terminate() end, desc = "Terminate" },
+      { "<leader>dL", function() vim.cmd("edit " .. vim.fn.stdpath("cache") .. "/dap.log") end, desc = "Open DAP Log" },
     },
     config = function()
       local dap = require("dap")
+      dap.set_log_level("INFO")
 
       vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DiagnosticError" })
       vim.fn.sign_define("DapBreakpointCondition", { text = "●", texthl = "DiagnosticWarn" })
       vim.fn.sign_define("DapBreakpointRejected", { text = "●", texthl = "DiagnosticHint" })
       vim.fn.sign_define("DapLogPoint", { text = "●", texthl = "DiagnosticInfo" })
       vim.fn.sign_define("DapStopped", { text = "→", texthl = "DiagnosticOk", linehl = "Visual" })
+
+      -- Open browser when dotnet app starts (if launchBrowser is set)
+      dap.listeners.after.event_process.open_browser = function()
+        if dotnet_launch_url then
+          local url = dotnet_launch_url
+          -- Delay to let the app finish starting
+          vim.defer_fn(function()
+            vim.fn.jobstart({ "xdg-open", url }, { detach = true })
+          end, 3000)
+        end
+      end
 
       ---------------------------------------------------------------
       -- .NET / C# (netcoredbg)
@@ -50,32 +63,105 @@ return {
         args = { "--interpreter=vscode" },
       }
 
-      local function pick_dotnet_dll()
+      -- Stored session state (set during pick_dotnet_session)
+      local dotnet_project_dir = nil
+      local dotnet_launch_url = nil
+      local dotnet_env = nil
+
+      local function pick_dotnet_session()
         local co = coroutine.running()
         local cwd = vim.fn.getcwd()
+
+        -- Reset state
+        dotnet_project_dir = nil
+        dotnet_launch_url = nil
+        dotnet_env = nil
+
+        -- Step 1: Pick DLL
+        local dll
         local dlls = vim.fn.glob(cwd .. "/bin/Debug/net*/*.dll", false, true)
         if #dlls == 0 then
           dlls = vim.fn.glob(cwd .. "/**/bin/Debug/net*/*.dll", false, true)
         end
         if #dlls == 0 then
+          dotnet_project_dir = cwd
           local input = vim.fn.input("Path to dll: ", cwd .. "/", "file")
           if input == "" then return nil end
-          return input
+          dll = input
         elseif #dlls == 1 then
-          return dlls[1]
+          dotnet_project_dir = dlls[1]:match("(.+)/bin/")
+          dll = dlls[1]
         else
-          -- Show relative paths in picker
           local labels = {}
-          for i, dll in ipairs(dlls) do
-            labels[i] = dll:sub(#cwd + 2)
+          for i, d in ipairs(dlls) do
+            labels[i] = d:sub(#cwd + 2)
           end
-          vim.ui.select(labels, { prompt = "Select DLL to debug:" }, function(choice, idx)
+          vim.ui.select(labels, { prompt = "Select DLL to debug:" }, function(_, idx)
             if co then
-              coroutine.resume(co, idx and dlls[idx] or nil)
+              coroutine.resume(co, idx)
             end
           end)
-          return coroutine.yield()
+          local idx = coroutine.yield()
+          if not idx then return nil end
+          dotnet_project_dir = dlls[idx]:match("(.+)/bin/")
+          dll = dlls[idx]
         end
+
+        -- Step 2: Pick launch profile
+        local search_dir = dotnet_project_dir or cwd
+        local profiles = {}
+        local files = vim.fn.glob(search_dir .. "/Properties/launchSettings.json", false, true)
+        if #files == 0 then
+          files = vim.fn.glob(cwd .. "/**/Properties/launchSettings.json", false, true)
+        end
+        for _, file in ipairs(files) do
+          local ok, content = pcall(vim.fn.readfile, file)
+          if ok then
+            local json = vim.fn.json_decode(table.concat(content, "\n"))
+            if json and json.profiles then
+              for name, profile in pairs(json.profiles) do
+                profiles[name] = profile
+              end
+            end
+          end
+        end
+
+        local names = vim.tbl_keys(profiles)
+        if #names == 0 then
+          local input = vim.fn.input("ASPNETCORE_ENVIRONMENT: ", "Development")
+          dotnet_env = { ASPNETCORE_ENVIRONMENT = input }
+          return dll
+        end
+
+        table.sort(names)
+        vim.ui.select(names, { prompt = "Select launch profile:" }, function(choice)
+          if co then
+            coroutine.resume(co, choice)
+          end
+        end)
+        local selected = coroutine.yield()
+
+        if not selected then
+          dotnet_env = { ASPNETCORE_ENVIRONMENT = "Development" }
+          return dll
+        end
+
+        local profile = profiles[selected]
+        local env = profile.environmentVariables or {}
+        if profile.applicationUrl then
+          env.ASPNETCORE_URLS = profile.applicationUrl
+        end
+        if profile.launchBrowser and profile.launchUrl then
+          local base = profile.applicationUrl or "http://localhost:5000"
+          base = base:match("^[^,]+")
+          local url = profile.launchUrl
+          if not url:match("^https?://") then
+            url = base:gsub("0%.0%.0%.0", "localhost") .. "/" .. url
+          end
+          dotnet_launch_url = url
+        end
+        dotnet_env = env
+        return dll
       end
 
       dap.configurations.cs = {
@@ -84,17 +170,15 @@ return {
           name = "Launch - netcoredbg",
           request = "launch",
           program = function()
-            local dll = pick_dotnet_dll()
+            local dll = pick_dotnet_session()
             if not dll then
               vim.notify("Debug cancelled", vim.log.levels.INFO)
               return dap.ABORT
             end
             return dll
           end,
-          cwd = "${workspaceFolder}",
-          env = {
-            ASPNETCORE_ENVIRONMENT = "Development",
-          },
+          cwd = function() return dotnet_project_dir or vim.fn.getcwd() end,
+          env = function() return dotnet_env or { ASPNETCORE_ENVIRONMENT = "Development" } end,
         },
         {
           type = "coreclr",
