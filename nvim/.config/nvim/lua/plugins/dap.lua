@@ -245,8 +245,8 @@ return {
             type = "pwa-node",
             request = "launch",
             name = "Launch Next.js dev",
-            runtimeExecutable = "npm",
-            runtimeArgs = { "run", "dev" },
+            runtimeExecutable = "pnpm",
+            runtimeArgs = { "dev" },
             cwd = "${workspaceFolder}",
             sourceMaps = true,
             skipFiles = { "<node_internals>/**", "**/node_modules/**" },
@@ -255,6 +255,7 @@ return {
               "!**/node_modules/**",
             },
             console = "integratedTerminal",
+            env = { NO_COLOR = "1" },
           },
           {
             type = "pwa-chrome",

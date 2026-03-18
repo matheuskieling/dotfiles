@@ -47,6 +47,11 @@ stow bash --adopt
 git checkout .
 cd ~
 
+# ---- pnpm ----
+if ! command -v pnpm >/dev/null 2>&1; then
+  npm install -g pnpm
+fi
+
 # ---- CLAUDE CODE ----
 if ! command -v claude >/dev/null 2>&1; then
   curl -fsSL https://claude.ai/install.sh | bash
