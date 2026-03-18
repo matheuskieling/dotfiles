@@ -44,13 +44,12 @@ return {
       vim.fn.sign_define("DapStopped", { text = "→", texthl = "DiagnosticOk", linehl = "Visual" })
 
       -- Open browser when dotnet app starts (if launchBrowser is set)
-      dap.listeners.after.event_process.open_browser = function()
-        if dotnet_launch_url then
-          local url = dotnet_launch_url
-          -- Delay to let the app finish starting
+      dap.listeners.after.event_initialized.open_browser = function()
+        if dotnet_session and dotnet_session.launch_url then
+          local url = dotnet_session.launch_url
           vim.defer_fn(function()
             vim.fn.jobstart({ "xdg-open", url }, { detach = true })
-          end, 3000)
+          end, 5000)
         end
       end
 
@@ -63,34 +62,33 @@ return {
         args = { "--interpreter=vscode" },
       }
 
-      -- Stored session state (set during pick_dotnet_session)
-      local dotnet_project_dir = nil
-      local dotnet_launch_url = nil
-      local dotnet_env = nil
+      -- Session state (picked once, used by program/env/cwd)
+      local dotnet_session = nil
 
-      local function pick_dotnet_session()
+      local function ensure_dotnet_session()
+        if dotnet_session then return dotnet_session end
+
         local co = coroutine.running()
         local cwd = vim.fn.getcwd()
-
-        -- Reset state
-        dotnet_project_dir = nil
-        dotnet_launch_url = nil
-        dotnet_env = nil
+        dotnet_session = {
+          dll = nil,
+          cwd = cwd,
+          env = { ASPNETCORE_ENVIRONMENT = "Development" },
+          launch_url = nil,
+        }
 
         -- Step 1: Pick DLL
-        local dll
         local dlls = vim.fn.glob(cwd .. "/bin/Debug/net*/*.dll", false, true)
         if #dlls == 0 then
           dlls = vim.fn.glob(cwd .. "/**/bin/Debug/net*/*.dll", false, true)
         end
         if #dlls == 0 then
-          dotnet_project_dir = cwd
           local input = vim.fn.input("Path to dll: ", cwd .. "/", "file")
-          if input == "" then return nil end
-          dll = input
+          if input == "" then return dotnet_session end
+          dotnet_session.dll = input
         elseif #dlls == 1 then
-          dotnet_project_dir = dlls[1]:match("(.+)/bin/")
-          dll = dlls[1]
+          dotnet_session.cwd = dlls[1]:match("(.+)/bin/")
+          dotnet_session.dll = dlls[1]
         else
           local labels = {}
           for i, d in ipairs(dlls) do
@@ -102,13 +100,13 @@ return {
             end
           end)
           local idx = coroutine.yield()
-          if not idx then return nil end
-          dotnet_project_dir = dlls[idx]:match("(.+)/bin/")
-          dll = dlls[idx]
+          if not idx then return dotnet_session end
+          dotnet_session.cwd = dlls[idx]:match("(.+)/bin/")
+          dotnet_session.dll = dlls[idx]
         end
 
         -- Step 2: Pick launch profile
-        local search_dir = dotnet_project_dir or cwd
+        local search_dir = dotnet_session.cwd
         local profiles = {}
         local files = vim.fn.glob(search_dir .. "/Properties/launchSettings.json", false, true)
         if #files == 0 then
@@ -129,8 +127,8 @@ return {
         local names = vim.tbl_keys(profiles)
         if #names == 0 then
           local input = vim.fn.input("ASPNETCORE_ENVIRONMENT: ", "Development")
-          dotnet_env = { ASPNETCORE_ENVIRONMENT = input }
-          return dll
+          dotnet_session.env = { ASPNETCORE_ENVIRONMENT = input }
+          return dotnet_session
         end
 
         table.sort(names)
@@ -141,10 +139,7 @@ return {
         end)
         local selected = coroutine.yield()
 
-        if not selected then
-          dotnet_env = { ASPNETCORE_ENVIRONMENT = "Development" }
-          return dll
-        end
+        if not selected then return dotnet_session end
 
         local profile = profiles[selected]
         local env = profile.environmentVariables or {}
@@ -158,11 +153,15 @@ return {
           if not url:match("^https?://") then
             url = base:gsub("0%.0%.0%.0", "localhost") .. "/" .. url
           end
-          dotnet_launch_url = url
+          dotnet_session.launch_url = url
         end
-        dotnet_env = env
-        return dll
+        dotnet_session.env = env
+        return dotnet_session
       end
+
+      -- Reset session when debugging ends so next run picks fresh
+      dap.listeners.before.event_terminated.reset_dotnet = function() dotnet_session = nil end
+      dap.listeners.before.event_exited.reset_dotnet = function() dotnet_session = nil end
 
       dap.configurations.cs = {
         {
@@ -170,15 +169,15 @@ return {
           name = "Launch - netcoredbg",
           request = "launch",
           program = function()
-            local dll = pick_dotnet_session()
-            if not dll then
+            local s = ensure_dotnet_session()
+            if not s.dll then
               vim.notify("Debug cancelled", vim.log.levels.INFO)
               return dap.ABORT
             end
-            return dll
+            return s.dll
           end,
-          cwd = function() return dotnet_project_dir or vim.fn.getcwd() end,
-          env = function() return dotnet_env or { ASPNETCORE_ENVIRONMENT = "Development" } end,
+          cwd = function() return ensure_dotnet_session().cwd end,
+          env = function() return ensure_dotnet_session().env end,
         },
         {
           type = "coreclr",

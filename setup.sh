@@ -43,6 +43,7 @@ stow alacritty --adopt
 stow hypr --adopt
 stow waybar --adopt
 stow starship --adopt
+stow bash --adopt
 git checkout .
 cd ~
 
