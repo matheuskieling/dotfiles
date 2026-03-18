@@ -35,6 +35,12 @@ return {
     config = function()
       local dap = require("dap")
 
+      vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DiagnosticError" })
+      vim.fn.sign_define("DapBreakpointCondition", { text = "●", texthl = "DiagnosticWarn" })
+      vim.fn.sign_define("DapBreakpointRejected", { text = "●", texthl = "DiagnosticHint" })
+      vim.fn.sign_define("DapLogPoint", { text = "●", texthl = "DiagnosticInfo" })
+      vim.fn.sign_define("DapStopped", { text = "→", texthl = "DiagnosticOk", linehl = "Visual" })
+
       ---------------------------------------------------------------
       -- .NET / C# (netcoredbg)
       ---------------------------------------------------------------
@@ -186,11 +192,30 @@ return {
     dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
     keys = {
       { "<leader>du", function() require("dapui").toggle({}) end, desc = "Dap UI" },
-      { "<leader>de", function() require("dapui").eval() end, desc = "Eval", mode = { "n", "v" } },
+      { "<leader>de", function() require("dapui").eval() end, desc = "Eval under cursor", mode = { "n", "v" } },
+      { "<leader>dE", function() require("dapui").eval(vim.fn.input("Expression: ")) end, desc = "Eval expression" },
     },
     config = function()
       local dap, dapui = require("dap"), require("dapui")
-      dapui.setup()
+      dapui.setup({
+        controls = { enabled = false },
+        layouts = {
+          {
+            elements = {
+              { id = "scopes", size = 1 },
+            },
+            position = "left",
+            size = 40,
+          },
+          {
+            elements = {
+              { id = "repl", size = 1 },
+            },
+            position = "bottom",
+            size = 10,
+          },
+        },
+      })
 
       dap.listeners.before.attach.dapui_config = function() dapui.open() end
       dap.listeners.before.launch.dapui_config = function() dapui.open() end

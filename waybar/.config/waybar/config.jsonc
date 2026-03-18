@@ -57,7 +57,7 @@
 
   "cpu": {
     "interval": 5,
-    "format": "󰍛",
+    "format": "{usage}% 󰍛",
     "on-click": "omarchy-launch-or-focus-tui btop",
     "on-click-right": "alacritty"
   },
@@ -82,8 +82,8 @@
   },
   "battery": {
     "format": "{capacity}% {icon}",
-    "format-discharging": "{icon}",
-    "format-charging": "{icon}",
+    "format-discharging": "{capacity}% {icon}",
+    "format-charging": "{capacity}% {icon}",
     "format-plugged": "",
     "format-icons": {
       "charging": ["󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"],
@@ -109,7 +109,7 @@
     "on-click": "omarchy-launch-bluetooth"
   },
   "pulseaudio": {
-    "format": "{icon}",
+    "format": "{volume}% {icon}",
     "on-click": "omarchy-launch-audio",
     "on-click-right": "pamixer -t",
     "tooltip-format": "Playing at {volume}%",
