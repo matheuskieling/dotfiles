@@ -14,26 +14,12 @@ sudo pacman -S --noconfirm --needed dbeaver
 
 # ---- AUR ----
 yay -S --noconfirm --needed google-chrome
-yay -S --noconfirm --needed zapzap
-
 # ---- Configurações Git ----
 git config --global credential.helper libsecret
 git config --global credential.useHttpPath true
 
-# ---- Clone Dotfiles ----
-cd ~
-if [ -d ".git" ]; then
-  echo "Já dentro do repo"
-else
-  cd ~
-  if [ ! -d "dotfiles" ]; then
-    git clone https://github.com/matheuskieling/dotfiles.git
-  fi
-  cd dotfiles
-fi
-
-# ---- Stow configs (--adopt overwrites existing files) ----
 cd ~/dotfiles
+
 sudo stow keyd -t / --adopt
 stow xkb --adopt
 stow tmux --adopt
@@ -45,6 +31,7 @@ stow waybar --adopt
 stow starship --adopt
 stow bash --adopt
 git checkout .
+
 cd ~
 
 # ---- pnpm ----
