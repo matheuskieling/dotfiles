@@ -12,5 +12,8 @@ source ~/.local/share/omarchy/default/bash/init
 #
 # Make an alias for invoking commands you use constantly
 # alias p='python'
+alias gco='git checkout'
+alias gpl='git pull'
+alias gph='git push'
 
 set -o vi
