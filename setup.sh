@@ -54,5 +54,8 @@ if [ ! -d ~/.tmux/plugins/tpm ]; then
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 fi
 
+# ---- Timezone ----
+sudo timedatectl set-timezone America/Sao_Paulo
+
 sudo keyd reload
 tmux source-file ~/.config/tmux/tmux.conf 2>/dev/null || true
