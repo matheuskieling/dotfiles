@@ -11,12 +11,18 @@ sudo pacman -S --noconfirm --needed dotnet-sdk-8.0
 sudo pacman -S --noconfirm --needed aspnet-runtime-8.0
 sudo pacman -S --noconfirm --needed discord
 sudo pacman -S --noconfirm --needed dbeaver
+sudo pacman -S --noconfirm --needed git-delta
 
 # ---- AUR ----
 yay -S --noconfirm --needed google-chrome
 # ---- Configurações Git ----
 git config --global credential.helper libsecret
 git config --global credential.useHttpPath true
+git config --global core.pager delta
+git config --global interactive.diffFilter "delta --color-only"
+git config --global delta.navigate true
+git config --global delta.dark true
+git config --global delta.line-numbers true
 
 cd ~/dotfiles
 
@@ -30,6 +36,7 @@ stow hypr --adopt
 stow waybar --adopt
 stow starship --adopt
 stow bash --adopt
+stow lazygit --adopt
 git checkout .
 
 cd ~
