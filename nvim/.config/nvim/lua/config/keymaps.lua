@@ -7,3 +7,10 @@ vim.keymap.set("n", "j", "gjzz", { desc = "Move down (visual line) and center" }
 vim.keymap.set("n", "k", "gkzz", { desc = "Move up (visual line) and center" })
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down half page and center" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up half page and center" })
+
+vim.keymap.set("n", "<leader>oi", function()
+  vim.lsp.buf.code_action({
+    context = { only = { "source.removeUnusedImports", "source.fixAll" } },
+    apply = true,
+  })
+end, { desc = "Optimize Imports" })
