@@ -61,6 +61,16 @@ if [ ! -d ~/.tmux/plugins/tpm ]; then
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 fi
 
+# ---- CNPJ Serendipe ----
+if [ ! -d ~/cnpj ]; then
+  git clone https://github.com/matheuskieling/CNPJ-Serendipe.git ~/cnpj
+fi
+
+# ---- OpenVPN ----
+if [ ! -d ~/openvpn ]; then
+  git clone https://github.com/matheuskieling/openvpn.git ~/openvpn
+fi
+
 # ---- Timezone ----
 sudo timedatectl set-timezone America/Sao_Paulo
 
