@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
 
+dirs=(
+    ~/projects
+    ~/dotfiles
+    ~/dev
+    ~/dev/go
+    ~/dev/chess-realtime
+    ~/notes
+    ~/cnpj
+    ~/openvpn
+)
+
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    selected=$(find ~/projects ~/dotfiles ~/dev ~/dev/go ~/notes ~/cnpj ~/openvpn/ -mindepth 0 -maxdepth 1 -type d 2>/dev/null | fzf)
+    selected=$(find "${dirs[@]}" -mindepth 0 -maxdepth 1 -type d 2>/dev/null | fzf)
 fi
 
 if [[ -z $selected ]]; then
