@@ -6,4 +6,9 @@ xkb_symbols "altgr-intl-cedilla" {
         type[Group1] = "FOUR_LEVEL",
         symbols[Group1] = [ c, C, ccedilla, Ccedilla ]
     };
+
+    key <CAPS> {
+        type[Group1] = "ONE_LEVEL",
+        symbols[Group1] = [ Caps_Lock ]
+    };
 };
