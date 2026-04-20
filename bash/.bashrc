@@ -17,3 +17,4 @@ alias gpl='git pull'
 alias gph='git push'
 
 set -o vi
+export PATH=$PATH:/home/mkieling/go/bin
