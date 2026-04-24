@@ -2,19 +2,19 @@
 set -e  # sai se algum comando falhar
 
 # ---- Pacotes ----
-sudo pacman -S --noconfirm --needed stow
-sudo pacman -S --noconfirm --needed keyd
-sudo pacman -S --noconfirm --needed libsecret
-sudo pacman -S --noconfirm --needed tmux
-sudo pacman -S --noconfirm --needed fzf
-sudo pacman -S --noconfirm --needed dotnet-sdk-8.0
-sudo pacman -S --noconfirm --needed aspnet-runtime-8.0
-sudo pacman -S --noconfirm --needed discord
-sudo pacman -S --noconfirm --needed dbeaver
-sudo pacman -S --noconfirm --needed git-delta
+sudo pacman -S --noconfirm --needed stow || true
+sudo pacman -S --noconfirm --needed keyd || true
+sudo pacman -S --noconfirm --needed libsecret || true
+sudo pacman -S --noconfirm --needed tmux || true
+sudo pacman -S --noconfirm --needed fzf || true
+sudo pacman -S --noconfirm --needed dotnet-sdk-8.0 || true
+sudo pacman -S --noconfirm --needed aspnet-runtime-8.0 || true
+sudo pacman -S --noconfirm --needed discord || true
+sudo pacman -S --noconfirm --needed dbeaver || true
+sudo pacman -S --noconfirm --needed git-delta || true
 
 # ---- AUR ----
-yay -S --noconfirm --needed google-chrome
+yay -S --noconfirm --needed google-chrome || true
 # ---- Configurações Git ----
 git config --global credential.helper libsecret
 git config --global credential.useHttpPath true
