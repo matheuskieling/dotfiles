@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-THRESHOLDS=(41 40 39 38 37)
+THRESHOLDS=(20 15 10 8 5 4 3 2 1)
 INTERVAL=60
 NOTIFIED=()
 
