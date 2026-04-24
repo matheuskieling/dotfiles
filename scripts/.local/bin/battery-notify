@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+THRESHOLDS=(41 40 39 38 37)
+INTERVAL=60
+NOTIFIED=()
+
+while true; do
+    capacity=$(cat /sys/class/power_supply/BAT0/capacity)
+    status=$(cat /sys/class/power_supply/BAT0/status)
+
+    if [[ "$status" == "Discharging" ]]; then
+        for threshold in "${THRESHOLDS[@]}"; do
+            if (( capacity == threshold )) && [[ ! " ${NOTIFIED[*]} " =~ " ${threshold} " ]]; then
+                notify-send -u critical "Bateria baixa" "Bateria em ${capacity}%! Conecte o carregador."
+                NOTIFIED+=("$threshold")
+            fi
+        done
+
+        # Reset notified list when battery goes above max threshold (charging happened)
+        if (( capacity > THRESHOLDS[0] )); then
+            NOTIFIED=()
+        fi
+    else
+        NOTIFIED=()
+    fi
+
+    sleep "$INTERVAL"
+done
