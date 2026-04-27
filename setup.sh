@@ -3,7 +3,6 @@ set -e  # sai se algum comando falhar
 
 # ---- Pacotes ----
 sudo pacman -S --noconfirm --needed stow || true
-sudo pacman -S --noconfirm --needed keyd || true
 sudo pacman -S --noconfirm --needed libsecret || true
 sudo pacman -S --noconfirm --needed tmux || true
 sudo pacman -S --noconfirm --needed fzf || true
@@ -15,6 +14,11 @@ sudo pacman -S --noconfirm --needed git-delta || true
 
 # ---- AUR ----
 yay -S --noconfirm --needed google-chrome || true
+yay -S --noconfirm --needed kanata || true
+
+# ---- Desabilita remappers concorrentes (keyd e makima do omarchy) ----
+sudo systemctl disable --now keyd 2>/dev/null || true
+sudo systemctl disable --now makima 2>/dev/null || true
 # ---- Configurações Git ----
 git config --global credential.helper libsecret
 git config --global credential.useHttpPath true
@@ -26,7 +30,7 @@ git config --global delta.line-numbers true
 
 cd ~/dotfiles
 
-sudo stow keyd -t / --adopt
+stow kanata --adopt
 stow xkb --adopt
 stow tmux --adopt
 stow scripts --adopt
@@ -74,5 +78,9 @@ fi
 # ---- Timezone ----
 sudo timedatectl set-timezone America/Sao_Paulo
 
-sudo keyd reload
+# ---- Kanata user service ----
+systemctl --user daemon-reload
+systemctl --user enable --now kanata.service || true
+systemctl --user restart kanata.service || true
+
 tmux source-file ~/.config/tmux/tmux.conf 2>/dev/null || true
