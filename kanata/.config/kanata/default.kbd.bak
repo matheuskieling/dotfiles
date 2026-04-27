@@ -1,0 +1,58 @@
+;; ============================================================
+;; Kanata config - homerow mods + remaps migrados do keyd
+;; ============================================================
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes)
+
+;; defsrc lista as teclas físicas que o kanata vai gerenciar.
+;; Posições QWERTY (kanata opera ANTES do xkb, então o layout
+;; custom altgr-intl-cedilla do Hyprland continua funcionando).
+(defsrc
+  caps esc  ralt
+  q    w    e    r    t    y    u    i    o    p
+  a    s    d    f    g    h    j    k    l    ;
+  z    x    c    v    b    n    m    ,    .    /)
+
+(defvar
+  tap-time 150
+  hold-time 150
+
+  ;; Teclas da mesma mão. Se você rolar de 'a' para 's' rápido,
+  ;; o kanata trata 'a' como tap (não dispara Alt).
+  left-hand-keys  (q w e r t  a s d f g  z x c v b)
+  right-hand-keys (y u i o p  h j k l ;  n m , . /))
+
+(defalias
+  ;; --- Remaps migrados do keyd ---
+  cap  esc                          ;; capslock -> esc
+  ess  (tap-hold 200 200 esc lsft)  ;; esc: tap=esc, hold=shift
+  ;; ralt: passa ralt pro xkb (AltGr funciona) E ativa a nav layer simultaneamente.
+  ;; Em nav, h/j/k/l viram setas. xkb verá AltGr+seta (geralmente inofensivo).
+  nav  (multi ralt (layer-while-held nav))
+
+  ;; --- Homerow mods BILATERAIS ---
+  ;; (tap-hold-release-keys tap-time hold-time tap-action hold-action keys-que-forçam-tap)
+  ;; Para mods da mão esquerda, listar teclas da PRÓPRIA mão força tap em rolls.
+  hra (tap-hold-release-keys $tap-time $hold-time a lalt $left-hand-keys)
+  hrs (tap-hold-release-keys $tap-time $hold-time s lctl $left-hand-keys)
+  hrd (tap-hold-release-keys $tap-time $hold-time d lmet $left-hand-keys)
+  hrf (tap-hold-release-keys $tap-time $hold-time f lsft $left-hand-keys)
+
+  hrj (tap-hold-release-keys $tap-time $hold-time j rsft $right-hand-keys)
+  hrk (tap-hold-release-keys $tap-time $hold-time k rmet $right-hand-keys)
+  hrl (tap-hold-release-keys $tap-time $hold-time l rctl $right-hand-keys)
+  hr; (tap-hold-release-keys $tap-time $hold-time ; ralt $right-hand-keys))
+
+(deflayer base
+  @cap @ess @nav
+  q    w    e    r    t    y    u    i    o    p
+  @hra @hrs @hrd @hrf g    h    @hrj @hrk @hrl @hr;
+  z    x    c    v    b    n    m    ,    .    /)
+
+(deflayer nav
+  _    _    _
+  _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    left down up   rght _
+  _    _    _    _    _    _    _    _    _    _)
