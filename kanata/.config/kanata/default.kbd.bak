@@ -9,8 +9,10 @@
 ;; defsrc lista as teclas físicas que o kanata vai gerenciar.
 ;; Posições QWERTY (kanata opera ANTES do xkb, então o layout
 ;; custom altgr-intl-cedilla do Hyprland continua funcionando).
+;; lmet, lsft e f23 entram aqui só pra defchordsv2 detectar a tecla
+;; Copilot (que manda Super+Shift+F23). Em base eles passam transparentes.
 (defsrc
-  caps esc  ralt
+  caps esc  ralt  lmet lsft f23
   q    w    e    r    t    y    u    i    o    p
   a    s    d    f    g    h    j    k    l    ;
   z    x    c    v    b    n    m    ,    .    /)
@@ -31,28 +33,42 @@
   ;; ralt: passa ralt pro xkb (AltGr funciona) E ativa a nav layer simultaneamente.
   ;; Em nav, h/j/k/l viram setas. xkb verá AltGr+seta (geralmente inofensivo).
   nav  (multi ralt (layer-while-held nav))
+  ;; brackets: ativada via chord lmet+lsft+f23 (tecla Copilot). e/r/d/f/c/v viram brackets.
+  brk  (layer-while-held brackets)
 
-  ;; --- Homerow mods BILATERAIS ---
-  ;; (tap-hold-release-keys tap-time hold-time tap-action hold-action keys-que-forçam-tap)
-  ;; Para mods da mão esquerda, listar teclas da PRÓPRIA mão força tap em rolls.
-  hra (tap-hold-release-keys $tap-time $hold-time a lalt $left-hand-keys)
-  hrs (tap-hold-release-keys $tap-time $hold-time s lctl $left-hand-keys)
-  hrd (tap-hold-release-keys $tap-time $hold-time d lmet $left-hand-keys)
-  hrf (tap-hold-release-keys $tap-time $hold-time f lsft $left-hand-keys)
+  ;; --- Homerow mods BILATERAIS (instant cross-hand) ---
+  ;; (tap-hold-except-keys tap-time hold-time tap-action hold-action keys-que-forçam-tap)
+  ;; Mesma mão (listada) -> força tap (protege rolls como "as", "fast").
+  ;; Mão oposta (não listada) -> dispara o mod INSTANTANEAMENTE no press.
+  hra (tap-hold-except-keys $tap-time $hold-time a lalt $left-hand-keys)
+  hrs (tap-hold-except-keys $tap-time $hold-time s lctl $left-hand-keys)
+  hrd (tap-hold-except-keys $tap-time $hold-time d lmet $left-hand-keys)
+  hrf (tap-hold-except-keys $tap-time $hold-time f lsft $left-hand-keys)
 
-  hrj (tap-hold-release-keys $tap-time $hold-time j rsft $right-hand-keys)
-  hrk (tap-hold-release-keys $tap-time $hold-time k rmet $right-hand-keys)
-  hrl (tap-hold-release-keys $tap-time $hold-time l rctl $right-hand-keys)
-  hr; (tap-hold-release-keys $tap-time $hold-time ; ralt $right-hand-keys))
+  hrj (tap-hold-except-keys $tap-time $hold-time j rsft $right-hand-keys)
+  hrk (tap-hold-except-keys $tap-time $hold-time k rmet $right-hand-keys)
+  hrl (tap-hold-except-keys $tap-time $hold-time l rctl $right-hand-keys)
+  hr; (tap-hold-except-keys $tap-time $hold-time ; ralt $right-hand-keys))
+
+(defchordsv2
+  ;; Copilot key (Super+Shift+F23) -> ativa brackets layer. 50ms timeout.
+  ;; Chord suprime as 3 teclas, então xkb não vê Super/Shift segurados.
+  (lmet lsft f23) @brk 50 first-release ())
 
 (deflayer base
-  @cap @ess @nav
+  @cap @ess @nav  lmet lsft f23
   q    w    e    r    t    y    u    i    o    p
   @hra @hrs @hrd @hrf g    h    @hrj @hrk @hrl @hr;
   z    x    c    v    b    n    m    ,    .    /)
 
 (deflayer nav
-  _    _    _
+  _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    left down up   rght _
   _    _    _    _    _    _    _    _    _    _)
+
+(deflayer brackets
+  _       _    _    _    _    _
+  _       _    [    ]    _    _    _    _    _    _
+  S-bksl  _    S-9  S-0  _    _    _    _    _    _
+  S-7     _    S-[  S-]  _    _    _    _    _    _)
