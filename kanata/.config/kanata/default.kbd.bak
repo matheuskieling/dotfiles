@@ -1,70 +1,58 @@
 ;; ============================================================
-;; Kanata config - homerow mods + remaps migrados do keyd
+;; Kanata config - chord mods + Copilot=AltGr swap + nav inside AltGr
 ;; ============================================================
 
 (defcfg
   process-unmapped-keys yes
   concurrent-tap-hold yes)
 
-;; defsrc lista as teclas físicas que o kanata vai gerenciar.
-;; Posições QWERTY (kanata opera ANTES do xkb, então o layout
-;; custom altgr-intl-cedilla do Hyprland continua funcionando).
-;; lmet, lsft e f23 entram aqui só pra defchordsv2 detectar a tecla
-;; Copilot (que manda Super+Shift+F23). Em base eles passam transparentes.
+;; lmet, lsft, f23 entram em defsrc só pra defchordsv2 detectar a tecla
+;; Copilot (que envia Super+Shift+F23). Em base passam transparentes.
 (defsrc
   caps esc  ralt  lmet lsft f23
   q    w    e    r    t    y    u    i    o    p
   a    s    d    f    g    h    j    k    l    ;
   z    x    c    v    b    n    m    ,    .    /)
 
-(defvar
-  tap-time 150
-  hold-time 150
-
-  ;; Teclas da mesma mão. Se você rolar de 'a' para 's' rápido,
-  ;; o kanata trata 'a' como tap (não dispara Alt).
-  left-hand-keys  (q w e r t  a s d f g  z x c v b)
-  right-hand-keys (y u i o p  h j k l ;  n m , . /))
-
 (defalias
-  ;; --- Remaps migrados do keyd ---
-  cap  esc                          ;; capslock -> esc
-  ess  (tap-hold 200 200 esc lsft)  ;; esc: tap=esc, hold=shift
-  ;; ralt: passa ralt pro xkb (AltGr funciona) E ativa a nav layer simultaneamente.
-  ;; Em nav, h/j/k/l viram setas. xkb verá AltGr+seta (geralmente inofensivo).
-  nav  (multi ralt (layer-while-held nav))
-  ;; brackets: ativada via chord lmet+lsft+f23 (tecla Copilot). e/r/d/f/c/v viram brackets.
-  brk  (layer-while-held brackets)
+  cap   esc                          ;; capslock -> esc
+  ess   (tap-hold 200 200 esc lsft)  ;; esc: tap=esc, hold=shift
+  brk   (layer-while-held brackets)
+  ;; Tecla Copilot -> segura AltGr (ralt) E ativa layer altgr-nav.
+  ;; Em altgr-nav, h/j/k/l viram setas; demais teclas transparentes
+  ;; (emitem a letra normal, e como ralt está segurado pelo kanata,
+  ;; o xkb interpreta como AltGr+letra = acento).
+  agnav (multi ralt (layer-while-held altgr-nav))
 
-  ;; --- Homerow mods BILATERAIS (instant cross-hand) ---
-  ;; (tap-hold-except-keys tap-time hold-time tap-action hold-action keys-que-forçam-tap)
-  ;; Mesma mão (listada) -> força tap (protege rolls como "as", "fast").
-  ;; Mão oposta (não listada) -> dispara o mod INSTANTANEAMENTE no press.
-  hra (tap-hold-except-keys $tap-time $hold-time a lalt $left-hand-keys)
-  hrs (tap-hold-except-keys $tap-time $hold-time s lctl $left-hand-keys)
-  hrd (tap-hold-except-keys $tap-time $hold-time d lmet $left-hand-keys)
-  hrf (tap-hold-except-keys $tap-time $hold-time f lsft $left-hand-keys)
-
-  hrj (tap-hold-except-keys $tap-time $hold-time j rsft $right-hand-keys)
-  hrk (tap-hold-except-keys $tap-time $hold-time k rmet $right-hand-keys)
-  hrl (tap-hold-except-keys $tap-time $hold-time l rctl $right-hand-keys)
-  hr; (tap-hold-except-keys $tap-time $hold-time ; ralt $right-hand-keys))
+  ;; Setas no altgr-nav: usam unmod pra soltar o ralt momentaneamente
+  ;; (senão Chrome/etc. veem AltGr+seta = Alt+Left = voltar página)
+  ag-l (unmod left)
+  ag-d (unmod down)
+  ag-u (unmod up)
+  ag-r (unmod rght))
 
 (defchordsv2
-  ;; Copilot key (Super+Shift+F23) -> ativa brackets layer. 50ms timeout.
-  ;; Chord suprime as 3 teclas, então xkb não vê Super/Shift segurados.
-  (lmet lsft f23) @brk 50 first-release ())
+  ;; Mods via chord (pares de dedos adjacentes na home row).
+  ;; first-release = mod libera quando soltar a primeira tecla.
+  ;; (disabled-layers) = chord não dispara dentro dessas layers.
+  (a s)           lctl   50 first-release (altgr-nav brackets)
+  (l ;)           lctl   50 first-release (altgr-nav brackets)
+  (s d)           lmet   50 first-release (altgr-nav brackets)
+  (k l)           lmet   50 first-release (altgr-nav brackets)
+  (j k)           @brk   50 first-release (altgr-nav brackets)
+  ;; Tecla Copilot -> AltGr + nav layer
+  (lmet lsft f23) @agnav 50 first-release ())
 
 (deflayer base
-  @cap @ess @nav  lmet lsft f23
+  @cap @ess lsft  lmet lsft f23
   q    w    e    r    t    y    u    i    o    p
-  @hra @hrs @hrd @hrf g    h    @hrj @hrk @hrl @hr;
+  a    s    d    f    g    h    j    k    l    ;
   z    x    c    v    b    n    m    ,    .    /)
 
-(deflayer nav
+(deflayer altgr-nav
   _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    left down up   rght _
+  _    _    _    _    _    @ag-l @ag-d @ag-u @ag-r _
   _    _    _    _    _    _    _    _    _    _)
 
 (deflayer brackets

@@ -14,10 +14,20 @@
   a    s    d    f    g    h    j    k    l    ;
   z    x    c    v    b    n    m    ,    .    /)
 
+(defvar
+  tap-time 100
+  hold-time 100
+  left-hand-keys  (q w e r t  a s d f g  z x c v b)
+  right-hand-keys (y u i o p  h j k l ;  n m , . /))
+
 (defalias
   cap   esc                          ;; capslock -> esc
   ess   (tap-hold 200 200 esc lsft)  ;; esc: tap=esc, hold=shift
   brk   (layer-while-held brackets)
+  ;; Ctrl como tap-hold bilateral em a e ; (cross-hand instantâneo,
+  ;; mesma mão força tap pra proteger rolls).
+  ha    (tap-hold-except-keys $tap-time $hold-time a lctl $left-hand-keys)
+  hsc   (tap-hold-except-keys $tap-time $hold-time ; lctl $right-hand-keys)
   ;; Tecla Copilot -> segura AltGr (ralt) E ativa layer altgr-nav.
   ;; Em altgr-nav, h/j/k/l viram setas; demais teclas transparentes
   ;; (emitem a letra normal, e como ralt está segurado pelo kanata,
@@ -35,8 +45,6 @@
   ;; Mods via chord (pares de dedos adjacentes na home row).
   ;; first-release = mod libera quando soltar a primeira tecla.
   ;; (disabled-layers) = chord não dispara dentro dessas layers.
-  (a s)           lctl   50 first-release (altgr-nav brackets)
-  (l ;)           lctl   50 first-release (altgr-nav brackets)
   (s d)           lmet   50 first-release (altgr-nav brackets)
   (k l)           lmet   50 first-release (altgr-nav brackets)
   (j k)           @brk   50 first-release (altgr-nav brackets)
@@ -46,7 +54,7 @@
 (deflayer base
   @cap @ess lsft  lmet lsft f23
   q    w    e    r    t    y    u    i    o    p
-  a    s    d    f    g    h    j    k    l    ;
+  @ha  s    d    f    g    h    j    k    l    @hsc
   z    x    c    v    b    n    m    ,    .    /)
 
 (deflayer altgr-nav
