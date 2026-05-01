@@ -1,36 +1,23 @@
 ;; ============================================================
-;; Kanata config - chord mods + Copilot=AltGr swap + nav inside AltGr
+;; Kanata config - Copilot=AltGr swap + nav inside AltGr + brackets chord
 ;; ============================================================
 
 (defcfg
   process-unmapped-keys yes
   concurrent-tap-hold yes)
 
-;; lmet, lsft, f23 entram em defsrc só pra defchordsv2 detectar a tecla
-;; Copilot (que envia Super+Shift+F23). Em base passam transparentes.
+;; lmet, lsft, f23 -> defchordsv2 detectar Copilot (Super+Shift+F23).
+;; lalt, lmet -> swap (Alt físico vira Super, Super físico vira Alt).
 (defsrc
-  caps esc  ralt  lmet lsft f23
+  caps esc  ralt  lalt lmet lsft f23
   q    w    e    r    t    y    u    i    o    p
   a    s    d    f    g    h    j    k    l    ;
   z    x    c    v    b    n    m    ,    .    /)
-
-(defvar
-  tap-time 100
-  hold-time 100
-  left-hand-keys  (q w e r t  a s d f g  z x c v b)
-  right-hand-keys (y u i o p  h j k l ;  n m , . /))
 
 (defalias
   cap   esc                          ;; capslock -> esc
   ess   (tap-hold 200 200 esc lsft)  ;; esc: tap=esc, hold=shift
   brk   (layer-while-held brackets)
-  ;; Ctrl direito: tap-hold bilateral em ; (cross-hand instantâneo,
-  ;; mesma mão força tap pra proteger rolls).
-  ;; Ctrl esquerdo: chord a+s (definido em defchordsv2).
-  ;; fork: se shift segurado -> ; puro (pra :w funcionar em vim, etc.).
-  ;; Senão -> tap-hold normal (Ctrl no hold).
-  hscth (tap-hold-except-keys $tap-time $hold-time ; lctl $right-hand-keys)
-  hsc   (fork @hscth ; (lsft rsft))
   ;; Tecla Copilot -> segura AltGr (ralt) E ativa layer altgr-nav.
   ;; Em altgr-nav, h/j/k/l viram setas; demais teclas transparentes
   ;; (emitem a letra normal, e como ralt está segurado pelo kanata,
@@ -45,30 +32,26 @@
   ag-r (unmod rght))
 
 (defchordsv2
-  ;; Mods via chord (pares de dedos adjacentes na home row).
   ;; first-release = mod libera quando soltar a primeira tecla.
   ;; (disabled-layers) = chord não dispara dentro dessas layers.
-  (a s)           lctl   50 first-release (altgr-nav brackets)
-  (s d)           lmet   50 first-release (altgr-nav brackets)
-  (k l)           lmet   50 first-release (altgr-nav brackets)
   (j k)           @brk   50 first-release (altgr-nav brackets)
   ;; Tecla Copilot -> AltGr + nav layer
   (lmet lsft f23) @agnav 50 first-release ())
 
 (deflayer base
-  @cap @ess lsft  lmet lsft f23
+  @cap @ess lsft  lmet lalt lsft f23
   q    w    e    r    t    y    u    i    o    p
-  a    s    d    f    g    h    j    k    l    @hsc
+  a    s    d    f    g    h    j    k    l    ;
   z    x    c    v    b    n    m    ,    .    /)
 
 (deflayer altgr-nav
-  _    _    _    _    _    _
+  _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    @ag-l @ag-d @ag-u @ag-r _
   _    _    _    _    _    _    _    _    _    _)
 
 (deflayer brackets
-  _       _    _    _    _    _
+  _       _    _    _    _    _    _
   _       _    [    ]    _    _    _    _    _    _
   S-bksl  _    S-9  S-0  _    _    _    _    _    _
   S-7     _    S-[  S-]  _    _    _    _    _    _)
