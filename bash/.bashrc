@@ -18,5 +18,6 @@ alias gph='git push'
 
 set -o vi
 export PATH=$PATH:/home/mkieling/go/bin
+export PATH="$PATH:$HOME/.dotnet/tools"
 
 . "$HOME/.local/share/../bin/env"

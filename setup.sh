@@ -16,9 +16,11 @@ sudo pacman -S --noconfirm --needed git-delta || true
 yay -S --noconfirm --needed google-chrome || true
 yay -S --noconfirm --needed kanata || true
 
-# ---- Desabilita remappers concorrentes (keyd e makima do omarchy) ----
+# ---- Remove remappers concorrentes (keyd e makima do omarchy) ----
 sudo systemctl disable --now keyd 2>/dev/null || true
+sudo pacman -Rns --noconfirm keyd 2>/dev/null || true
 sudo systemctl disable --now makima 2>/dev/null || true
+systemctl --user restart kanata.service 2>/dev/null || true
 # ---- Configurações Git ----
 git config --global credential.helper libsecret
 git config --global credential.useHttpPath true
