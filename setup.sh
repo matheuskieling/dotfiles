@@ -21,6 +21,15 @@ sudo systemctl disable --now keyd 2>/dev/null || true
 sudo pacman -Rns --noconfirm keyd 2>/dev/null || true
 sudo systemctl disable --now makima 2>/dev/null || true
 systemctl --user restart kanata.service 2>/dev/null || true
+
+# ---- uinput para kanata (a migration do omarchy que remove makima também apaga isto) ----
+sudo groupadd -f uinput
+sudo usermod -aG uinput "$USER"
+echo 'KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"' | sudo tee /etc/udev/rules.d/99-uinput.rules >/dev/null
+echo uinput | sudo tee /etc/modules-load.d/uinput.conf >/dev/null
+sudo modprobe uinput
+sudo udevadm control --reload-rules
+sudo udevadm trigger
 # ---- Configurações Git ----
 git config --global credential.helper libsecret
 git config --global credential.useHttpPath true
