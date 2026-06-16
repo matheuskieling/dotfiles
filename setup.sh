@@ -7,6 +7,7 @@ sudo pacman -S --noconfirm --needed libsecret || true
 sudo pacman -S --noconfirm --needed tmux || true
 sudo pacman -S --noconfirm --needed fzf || true
 sudo pacman -S --noconfirm --needed dotnet-sdk-8.0 || true
+sudo pacman -S --noconfirm --needed dotnet-runtime-8.0 || true
 sudo pacman -S --noconfirm --needed aspnet-runtime-8.0 || true
 sudo pacman -S --noconfirm --needed discord || true
 sudo pacman -S --noconfirm --needed dbeaver || true
